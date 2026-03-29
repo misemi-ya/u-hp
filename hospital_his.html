@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>病院情報システム HIS — 横浜大学附属病院</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#17274a;--navy2:#1f3260;--navy3:#2b4480;
+  --blue:#1e5fa8;--blue2:#2a72c4;--lblue:#cfe2f8;
+  --g0:#f5f6f8;--g1:#eceef2;--g2:#dde0e8;--g3:#bec4d0;--g4:#8891a8;
+  --tx:#18213a;--tx2:#3d4a68;--tx3:#6e7c99;
+  --grn:#0f6e2e;--lgrn:#d0f0da;
+  --red:#a81818;--lred:#fce8e8;
+  --org:#a04800;--lorg:#fdecd8;
+  --yel:#7a6200;--lyel:#fdf6cc;
+  --pur:#4a2a88;--lpur:#ede8fc;
+  --teal:#0a6050;--lteal:#ccf0e8;
+}
+html,body{height:100%;font-family:'メイリオ',Meiryo,'MS Gothic',sans-serif;font-size:12px;color:var(--tx);background:#c8cee0;overflow:hidden}
+/* ======= LAYOUT ======= */
+.root{display:flex;flex-direction:column;height:100vh;min-height:660px}
+/* Header */
+.sys-hdr{height:32px;background:linear-gradient(180deg,#2f4590 0%,var(--navy) 100%);display:flex;align-items:center;padding:0 8px;gap:8px;flex-shrink:0;border-bottom:1px solid #0f1a38}
+.sys-logo{font-size:13px;font-weight:bold;color:#dde8f8;letter-spacing:.02em;white-space:nowrap}
+.sys-logo sub{font-size:9px;color:#8aaed8;margin-left:4px;font-weight:normal;letter-spacing:.04em}
+.sys-hdr-r{margin-left:auto;display:flex;align-items:center;gap:10px}
+.sys-info{font-size:10px;color:#90aad0;white-space:nowrap}
+.sys-info b{color:#c8dff8}
+.sys-hdr-btn{padding:2px 8px;border:1px solid #3a5080;border-radius:2px;background:#243060;color:#b0ccec;font-size:10px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.sys-hdr-btn:hover{background:#2e3e78}
+/* Menu bar */
+.menu-bar{height:26px;background:linear-gradient(180deg,#3858a8 0%,#2a4898 100%);display:flex;align-items:stretch;flex-shrink:0;border-bottom:2px solid #182880}
+.mb-item{display:flex;align-items:center;padding:0 12px;font-size:11px;color:#b8cef0;cursor:pointer;border-right:1px solid #283888;white-space:nowrap}
+.mb-item:hover{background:rgba(255,255,255,.12);color:#fff}
+.mb-item.act{background:var(--blue);color:#fff;font-weight:bold}
+/* Main area */
+.main{flex:1;display:flex;overflow:hidden}
+/* Left panel */
+.lp{width:188px;background:#e4e8f0;border-right:2px solid var(--g3);display:flex;flex-direction:column;flex-shrink:0}
+.lp-title{background:linear-gradient(180deg,var(--navy2) 0%,var(--navy) 100%);color:#b8d0f0;font-size:11px;font-weight:bold;padding:4px 8px;display:flex;justify-content:space-between;align-items:center}
+.lp-tabs{display:flex;background:#ccd2e0;border-bottom:1px solid var(--g3)}
+.lpt{flex:1;padding:4px 2px;text-align:center;font-size:10px;color:var(--tx2);cursor:pointer;border-right:1px solid var(--g3)}
+.lpt:last-child{border-right:none}
+.lpt.act{background:#fff;color:var(--blue);font-weight:bold}
+.lp-body{flex:1;overflow-y:auto;padding:3px}
+.lp-sec-hd{background:linear-gradient(90deg,var(--navy2),#2a4070);color:#b0c8f0;font-size:10px;font-weight:bold;padding:2px 6px;margin-bottom:2px;margin-top:3px}
+.pt-row{background:#fff;border:1px solid var(--g3);border-left:3px solid var(--blue);padding:4px 6px;margin-bottom:2px;cursor:pointer;transition:background .1s}
+.pt-row:hover{background:var(--lblue)}
+.pt-row.act{background:var(--lblue);border-left-color:#d03820}
+.pt-nm{font-size:11px;font-weight:bold;color:var(--tx)}
+.pt-id{font-size:10px;color:var(--tx3);margin-top:1px}
+.ptag{display:inline-block;padding:0 4px;font-size:9px;font-weight:bold;margin-top:2px;margin-right:2px}
+.tg-in{background:var(--lblue);color:var(--blue)}
+.tg-out{background:var(--lgrn);color:var(--grn)}
+.tg-em{background:var(--lred);color:var(--red)}
+.tg-icu{background:#fce0f8;color:#801060}
+.tg-new{background:#fce0f8;color:#801060}
+/* Right panel */
+.rp{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+/* Patient header */
+.pt-hdr{background:linear-gradient(180deg,#e8f0fa 0%,#d8e8f4 100%);border-bottom:2px solid var(--blue);padding:4px 10px;display:flex;align-items:center;gap:10px;flex-shrink:0;min-height:42px}
+.ph-name{font-size:15px;font-weight:bold;color:var(--navy);white-space:nowrap}
+.ph-kana{font-size:10px;color:var(--tx3)}
+.ph-metas{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-left:6px}
+.ph-meta{font-size:11px;color:var(--tx2)}
+.ph-meta b{color:var(--tx)}
+.ph-alg{background:var(--lred);border:1px solid #d08080;color:var(--red);font-size:10px;font-weight:bold;padding:1px 6px;white-space:nowrap}
+.ph-btns{margin-left:auto;display:flex;gap:4px}
+/* Function tabs */
+.ftabs{background:#ccd2e0;border-bottom:2px solid var(--g3);display:flex;align-items:stretch;flex-shrink:0;overflow-x:auto}
+.ft{padding:5px 11px;font-size:11px;color:var(--tx2);cursor:pointer;border-right:1px solid var(--g3);white-space:nowrap;display:flex;align-items:center;gap:3px}
+.ft:hover{background:#d8dce8;color:var(--tx)}
+.ft.act{background:#fff;color:var(--blue);font-weight:bold;border-bottom:2px solid var(--blue);margin-bottom:-2px}
+.ft-cnt{background:var(--red);color:#fff;font-size:9px;font-weight:bold;padding:0 4px;border-radius:8px;min-width:14px;text-align:center}
+/* Content */
+.ca{flex:1;overflow-y:auto;background:var(--g0);padding:5px}
+.sec{display:none}.sec.act{display:block}
+/* Panels */
+.panel{background:#fff;border:1px solid var(--g3);margin-bottom:5px}
+.ph{background:linear-gradient(180deg,#dce8f8 0%,#ccd8ee 100%);border-bottom:1px solid var(--g3);padding:3px 8px;display:flex;align-items:center;justify-content:space-between}
+.pt{font-size:11px;font-weight:bold;color:var(--navy2);display:flex;align-items:center;gap:4px}
+.pt::before{content:'';width:3px;height:12px;background:var(--blue);display:inline-block;border-radius:1px}
+.pb{padding:6px}
+/* Tables */
+.t{width:100%;border-collapse:collapse;font-size:11px}
+.t th{background:linear-gradient(180deg,#dce8f8,#ccd8ee);color:var(--navy2);font-weight:bold;padding:3px 6px;border:1px solid var(--g3);white-space:nowrap;text-align:left}
+.t td{padding:3px 6px;border:1px solid var(--g2);vertical-align:middle}
+.t tr:hover td{background:#edf4fc;cursor:pointer}
+.t .h td{background:var(--lblue)}
+.t .em td{background:var(--lred)!important}
+.t .wn td{background:var(--lyel)!important}
+/* Status badges */
+.s{display:inline-block;padding:1px 5px;font-size:10px;font-weight:bold;border:1px solid;white-space:nowrap}
+.s-bl{background:var(--lblue);color:var(--blue);border-color:#80b0e0}
+.s-gr{background:var(--lgrn);color:var(--grn);border-color:#70b880}
+.s-rd{background:var(--lred);color:var(--red);border-color:#c08080}
+.s-or{background:var(--lorg);color:var(--org);border-color:#d0a070}
+.s-gy{background:var(--g2);color:var(--tx3);border-color:var(--g3)}
+.s-pu{background:var(--lpur);color:var(--pur);border-color:#a080d0}
+.s-tl{background:var(--lteal);color:var(--teal);border-color:#60b0a0}
+.s-yl{background:var(--lyel);color:var(--yel);border-color:#c0b040}
+/* Buttons */
+.btn{padding:3px 9px;font-size:11px;cursor:pointer;font-family:inherit;border:1px solid;border-radius:2px;white-space:nowrap}
+.b-bl{background:linear-gradient(180deg,#3878d0,var(--blue));color:#fff;border-color:#104090}
+.b-bl:hover{background:linear-gradient(180deg,#4888e0,var(--blue2))}
+.b-gy{background:linear-gradient(180deg,#eef2f8,#dee4f0);color:var(--tx2);border-color:var(--g3)}
+.b-gy:hover{background:linear-gradient(180deg,#f4f6fc,#e8eef8)}
+.b-rd{background:linear-gradient(180deg,#d83030,#b81818);color:#fff;border-color:#801010}
+.b-sm{padding:2px 7px;font-size:10px}
+/* Stat boxes */
+.sgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:5px}
+.sbox{background:#fff;border:1px solid var(--g3);padding:5px 8px;text-align:center}
+.sl{font-size:9px;color:var(--tx3);margin-bottom:1px}
+.sv{font-size:18px;font-weight:bold;color:var(--navy)}
+.ss{font-size:9px;color:var(--tx3);margin-top:1px}
+/* Vital signs */
+.vrow{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;margin-bottom:6px}
+.vbox{border:1px solid var(--g3);background:#f8faff;text-align:center;padding:4px 2px}
+.vbox.wn{border-color:#c08800;background:var(--lyel)}
+.vbox.al{border-color:var(--red);background:var(--lred)}
+.vl{font-size:9px;color:var(--tx3);margin-bottom:1px}
+.vv{font-size:15px;font-weight:bold;color:var(--navy)}
+.vu{font-size:9px;color:var(--tx3);margin-top:1px}
+/* SOAP */
+.soap-g{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.soap-b{border:1px solid var(--g3)}
+.soap-lbl{background:linear-gradient(180deg,var(--navy2),var(--navy));color:#b0ccf0;font-size:10px;font-weight:bold;padding:3px 7px}
+.soap-ta{width:100%;padding:4px;font-size:11px;font-family:inherit;border:none;border-top:1px solid var(--g3);resize:vertical;min-height:56px;background:#f8faff;color:var(--tx)}
+.soap-ta:focus{outline:none;background:#eef6ff}
+/* Bed map */
+.bedgrid{display:grid;grid-template-columns:repeat(8,1fr);gap:2px}
+.bed{border:1px solid var(--g3);padding:3px;text-align:center;font-size:9px;cursor:pointer;min-height:40px}
+.bed:hover{border-color:var(--blue)}
+.bn{font-weight:bold;font-size:10px;margin-bottom:1px}
+.bp{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.b-occ{background:#d8eeff;border-color:#80b0e0;color:var(--blue)}
+.b-emp{background:#f0f4f8;color:var(--tx3)}
+.b-res{background:#fff8cc;border-color:#d0b830;color:#7a6000}
+.b-iem{background:var(--lred);border-color:#c08080;color:var(--red)}
+/* Alert box */
+.alg{background:var(--lred);border:2px solid var(--red);padding:5px 10px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.alg-ic{font-size:15px}
+.alg-tx{font-size:11px;color:var(--red);font-weight:bold}
+/* Receipt */
+.rc-sec{border:1px solid var(--g3);margin-bottom:4px}
+.rc-hd{background:linear-gradient(180deg,#dce8f8,#ccd8ee);padding:2px 8px;font-size:10px;font-weight:bold;color:var(--navy2)}
+.rc-row{display:flex;justify-content:space-between;padding:2px 8px;border-bottom:1px solid var(--g2);font-size:11px}
+.rc-row:last-child{border-bottom:none}
+.rc-tot{background:#eef4fc;font-weight:bold;border-top:2px solid var(--blue)}
+/* Form */
+.fr{display:flex;gap:5px;margin-bottom:5px;align-items:center}
+.fl{font-size:11px;color:var(--tx2);white-space:nowrap;min-width:76px;text-align:right}
+.fl.req::after{content:'*';color:var(--red);margin-left:1px}
+.fi{padding:2px 5px;border:1px solid var(--g3);font-size:11px;font-family:inherit;background:#fff;color:var(--tx)}
+.fi:focus{outline:none;border-color:var(--blue);background:#f0f8ff}
+.fi-s{width:76px}.fi-m{width:155px}.fi-l{width:230px}
+.fi-ta{resize:vertical;min-height:48px;width:100%}
+.fi-sel{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%235a6888'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 5px center;padding-right:18px}
+/* Modal */
+.mw{display:none;position:fixed;inset:0;background:rgba(0,10,40,.55);align-items:center;justify-content:center;z-index:300}
+.mw.open{display:flex}
+.mb{background:#fff;border:2px solid var(--blue);min-width:390px;max-width:560px;width:90%;max-height:86vh;overflow-y:auto;display:flex;flex-direction:column}
+.mh{background:linear-gradient(180deg,var(--navy2),var(--navy));color:#c8e0f8;font-size:12px;font-weight:bold;padding:5px 12px;display:flex;justify-content:space-between;align-items:center}
+.mbd{padding:10px}
+.mf{padding:7px 12px;border-top:1px solid var(--g3);display:flex;justify-content:flex-end;gap:5px;background:var(--g1)}
+/* Toast */
+.toast{display:none;position:fixed;bottom:14px;right:14px;background:var(--navy);color:#c8e0f8;padding:7px 14px;border:1px solid var(--blue);font-size:11px;z-index:400}
+/* Scrollbar */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--g2)}
+::-webkit-scrollbar-thumb{background:#9098b8;border-radius:1px}
+</style>
+</head>
+<body>
+<div class="root">
+
+<!-- System header -->
+<div class="sys-hdr">
+  <div class="sys-logo">HOPE CLINIC HIS<sub>ver 3.2.1 — 横浜大学附属病院</sub></div>
+  <div class="sys-hdr-r">
+    <span class="sys-info">端末:<b> #024</b></span>
+    <span class="sys-info">操作者:<b> 山本 龍一（内科部長）</b></span>
+    <span class="sys-info">2026/03/28<b id="clk"></b></span>
+    <button class="sys-hdr-btn search-btn">🔍 患者検索</button>
+    <button class="sys-hdr-btn" onclick="openM('settings')">設定</button>
+    <button class="sys-hdr-btn logout-btn">ログアウト</button>
+  </div>
+</div>
+
+<!-- Menu bar -->
+<div class="menu-bar">
+  <div class="mb-item act" onclick="setMB(this)">外来業務</div>
+  <div class="mb-item" onclick="setMB(this)">入院業務</div>
+  <div class="mb-item" onclick="setMB(this)">オーダー入力</div>
+  <div class="mb-item" onclick="setMB(this)">薬剤管理</div>
+  <div class="mb-item" onclick="setMB(this)">検査・放射線</div>
+  <div class="mb-item" onclick="setMB(this)">会計・レセプト</div>
+  <div class="mb-item" onclick="setMB(this)">統計・集計</div>
+  <div class="mb-item" onclick="setMB(this)">マスタ管理 ▾</div>
+</div>
+
+<div class="main">
+<!-- Left panel: patient list -->
+<div class="lp">
+  <div class="lp-title">患者一覧<span style="font-size:9px;font-weight:normal;color:#7090c0">外来業務</span></div>
+  <div class="lp-tabs">
+    <div class="lpt act" onclick="setLPT(this)">受診待ち</div>
+    <div class="lpt" onclick="setLPT(this)">担当患者</div>
+    <div class="lpt" onclick="setLPT(this)">検索</div>
+  </div>
+  <div class="lp-body">
+    <div class="lp-sec-hd">▶ 受診待ち（5名）</div>
+
+    <div class="pt-row act" onclick="selPt(this,'佐藤 太郎','P001234','サトウ タロウ','68歳 男','内科','高血圧・2型糖尿病','アスピリン禁忌','入院')">
+      <div class="pt-nm">佐藤 太郎</div>
+      <div class="pt-id">P001234 ｜ 68歳 男</div>
+      <span class="ptag tg-in">入院</span><span class="ptag tg-em">アレルギー</span>
+    </div>
+
+    <div class="pt-row" onclick="selPt(this,'鈴木 花子','P002415','スズキ ハナコ','52歳 女','外科','胃癌術後','なし','入院')">
+      <div class="pt-nm">鈴木 花子</div>
+      <div class="pt-id">P002415 ｜ 52歳 女</div>
+      <span class="ptag tg-in">入院</span>
+    </div>
+
+    <div class="pt-row" onclick="selPt(this,'山田 健二','P003871','ヤマダ ケンジ','45歳 男','呼吸器科','気管支喘息','なし','外来')">
+      <div class="pt-nm">山田 健二</div>
+      <div class="pt-id">P003871 ｜ 45歳 男</div>
+      <span class="ptag tg-out">外来</span>
+    </div>
+
+    <div class="pt-row" onclick="selPt(this,'田中 良子','P005128','タナカ ヨシコ','71歳 女','整形外科','大腿骨骨折術後','なし','入院')">
+      <div class="pt-nm">田中 良子</div>
+      <div class="pt-id">P005128 ｜ 71歳 女</div>
+      <span class="ptag tg-in">入院</span>
+    </div>
+
+    <div class="pt-row" onclick="selPt(this,'中村 誠','P006342','ナカムラ マコト','38歳 男','神経内科','初診(頭痛)','なし','外来')">
+      <div class="pt-nm">中村 誠</div>
+      <div class="pt-id">P006342 ｜ 38歳 男</div>
+      <span class="ptag tg-out">外来</span><span class="ptag tg-new">初診</span>
+    </div>
+
+    <div class="lp-sec-hd">▶ 診察済（2名）</div>
+
+    <div class="pt-row" onclick="selPt(this,'木村 誠','P007211','キムラ マコト','63歳 男','循環器科','慢性心不全','なし','入院')">
+      <div class="pt-nm">木村 誠</div>
+      <div class="pt-id">P007211 ｜ 63歳 男</div>
+      <span class="ptag tg-icu">ICU</span>
+    </div>
+  </div>
+</div>
+
+<!-- Right panel -->
+<div class="rp">
+  <!-- Patient header bar -->
+  <div class="pt-hdr" id="pt-hdr">
+    <div>
+      <div style="display:flex;align-items:baseline;gap:5px">
+        <div class="ph-name" id="ph-nm">患者未選択</div>
+        <div class="ph-kana" id="ph-kn">← 左の一覧から患者を選択してください</div>
+      </div>
+    </div>
+    <div class="ph-metas" id="ph-meta"></div>
+    <div class="ph-btns" id="ph-btns" style="display:none">
+      <button class="btn b-bl b-sm" onclick="goT('orders')">オーダー入力</button>
+      <button class="btn b-bl b-sm" onclick="goT('chart')">カルテ記録</button>
+      <button class="btn b-bl b-sm" onclick="openM('billing-m')">会計へ</button>
+      <button class="btn b-bl b-sm" onclick="openM('new-pt')">新患登録</button>
+    </div>
+  </div>
+
+  <!-- Function tabs -->
+  <div class="ftabs">
+    <div class="ft act" id="ft-db"     onclick="goT('db')">ダッシュボード</div>
+    <div class="ft"     id="ft-chart"  onclick="goT('chart')">カルテ記録</div>
+    <div class="ft"     id="ft-orders" onclick="goT('orders')">オーダー<span class="ft-cnt">4</span></div>
+    <div class="ft"     id="ft-ward"   onclick="goT('ward')">病棟管理</div>
+    <div class="ft"     id="ft-rx"     onclick="goT('rx')">処方・投薬</div>
+    <div class="ft"     id="ft-labs"   onclick="goT('labs')">検査結果</div>
+    <div class="ft"     id="ft-bill"   onclick="goT('bill')">会計・レセプト</div>
+    <div class="ft"     id="ft-staff"  onclick="goT('staff')">スタッフ管理</div>
+  </div>
+
+  <!-- Content area -->
+  <div class="ca">
+
+    <!-- ===== DASHBOARD ===== -->
+    <div class="sec act" id="sec-db">
+      <div class="sgrid">
+        <div class="sbox"><div class="sl">本日外来患者</div><div class="sv" style="color:var(--blue)">47</div><div class="ss">予約38 / 当日9</div></div>
+        <div class="sbox"><div class="sl">入院患者数</div><div class="sv">182</div><div class="ss">空床 28</div></div>
+        <div class="sbox"><div class="sl">検査オーダー</div><div class="sv" style="color:var(--grn)">64</div><div class="ss">未結果 12</div></div>
+        <div class="sbox"><div class="sl">未会計件数</div><div class="sv" style="color:var(--org)">8</div><div class="ss">要対応</div></div>
+        <div class="sbox"><div class="sl">緊急アラート</div><div class="sv" style="color:var(--red)">5</div><div class="ss">要確認</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+        <div class="panel">
+          <div class="ph"><div class="pt">緊急・要対応アラート</div></div>
+          <div class="pb" style="padding:0">
+            <table class="t"><thead><tr><th>種別</th><th>患者名</th><th>内容</th><th>状態</th></tr></thead><tbody id="alert-tbody">
+              <tr class="em" onclick="alertRowAct('禁忌','山田 健二','処方薬アレルギー（ペニシリン系）')"><td><span class="s s-rd">禁忌</span></td><td>山田 健二</td><td>処方薬アレルギー（ペニシリン系）</td><td><span class="s s-rd">未対応</span></td></tr>
+              <tr class="em" onclick="alertRowAct('緊急','佐藤 一郎 ICU-3','BP 185/110 急変')"><td><span class="s s-rd">緊急</span></td><td>佐藤 一郎 ICU-3</td><td>BP 185/110 急変</td><td><span class="s s-rd">未対応</span></td></tr>
+              <tr class="wn" onclick="alertRowAct('警告','田中 良子 3B-12','14:00 投薬未実施')"><td><span class="s s-or">警告</span></td><td>田中 良子 3B-12</td><td>14:00 投薬未実施</td><td><span class="s s-or">要確認</span></td></tr>
+              <tr class="wn" onclick="alertRowAct('検査','鈴木 花子 2A-08','CBC Hb 6.2 g/dL 要確認')"><td><span class="s s-yl">検査</span></td><td>鈴木 花子 2A-08</td><td>CBC Hb 6.2 g/dL 要確認</td><td><span class="s s-yl">未確認</span></td></tr>
+              <tr onclick="alertRowAct('遅延','木村 誠','待ち時間 85分超')"><td><span class="s s-gy">遅延</span></td><td>木村 誠</td><td>待ち時間 85分超</td><td><span class="s s-gy">監視中</span></td></tr>
+            </tbody></table>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="pt">本日外来スケジュール</div><div style="display:flex;gap:4px"><button class="btn b-bl b-sm" id="add-sch-btn">＋ 予約追加</button><button class="btn b-bl b-sm go-ward-btn">病棟一覧</button></div></div>
+          <div class="pb" style="padding:0">
+            <table class="t"><thead><tr><th>時刻</th><th>患者名</th><th>担当医</th><th>診察内容</th><th>状態</th><th>対応</th></tr></thead><tbody id="schedule-tbody">
+            </tbody></table>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:5px">
+        <div class="panel">
+          <div class="ph"><div class="pt">病棟別稼働状況</div><button class="btn b-bl b-sm go-ward-btn">病棟マップへ</button></div>
+          <div class="pb" style="padding:0">
+            <table class="t"><thead><tr><th>病棟</th><th>担当科</th><th>総床</th><th>在院</th><th>空床</th><th>稼働率</th><th>状態</th></tr></thead><tbody>
+              <tr><td>2A病棟</td><td>内科</td><td>40</td><td>37</td><td>3</td><td>92.5%</td><td><span class="s s-or">満床近</span></td></tr>
+              <tr><td>2B病棟</td><td>外科</td><td>38</td><td>30</td><td>8</td><td>78.9%</td><td><span class="s s-gr">余裕</span></td></tr>
+              <tr><td>3A病棟</td><td>整形外科</td><td>36</td><td>31</td><td>5</td><td>86.1%</td><td><span class="s s-gr">余裕</span></td></tr>
+              <tr><td>3B病棟</td><td>混合</td><td>40</td><td>35</td><td>5</td><td>87.5%</td><td><span class="s s-gr">余裕</span></td></tr>
+              <tr><td>4A病棟</td><td>脳神経外科</td><td>32</td><td>29</td><td>3</td><td>90.6%</td><td><span class="s s-or">満床近</span></td></tr>
+              <tr class="em"><td>ICU</td><td>集中治療室</td><td>10</td><td>8</td><td>2</td><td>80.0%</td><td><span class="s s-rd">要注意</span></td></tr>
+            </tbody></table>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="pt">未処理オーダー</div></div>
+          <div class="pb" style="padding:0">
+            <table class="t"><thead><tr><th>種別</th><th>件数</th><th>状態</th></tr></thead><tbody>
+              <tr><td>血液検査</td><td>8件</td><td><span class="s s-or">採血待</span></td></tr>
+              <tr><td>CT / MRI</td><td>3件</td><td><span class="s s-or">撮影待</span></td></tr>
+              <tr class="em"><td>心電図</td><td>2件</td><td><span class="s s-rd">至急</span></td></tr>
+              <tr><td>尿検査</td><td>1件</td><td><span class="s s-gy">検体待</span></td></tr>
+              <tr><td>処方確認</td><td>4件</td><td><span class="s s-yl">確認中</span></td></tr>
+            </tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== CHART (SOAP) ===== -->
+    <div class="sec" id="sec-chart">
+      <div id="no-pt-msg" style="padding:20px;color:var(--tx3)">← 左の患者一覧から患者を選択してください。</div>
+      <div id="chart-body" style="display:none">
+        <div class="vrow">
+          <div class="vbox wn"><div class="vl">収縮期血圧</div><div class="vv" style="color:var(--org)">148</div><div class="vu">mmHg ↑</div></div>
+          <div class="vbox"><div class="vl">拡張期血圧</div><div class="vv">90</div><div class="vu">mmHg</div></div>
+          <div class="vbox"><div class="vl">脈拍</div><div class="vv">76</div><div class="vu">bpm</div></div>
+          <div class="vbox"><div class="vl">体温</div><div class="vv">36.4</div><div class="vu">℃</div></div>
+          <div class="vbox"><div class="vl">SpO2</div><div class="vv" style="color:var(--grn)">98</div><div class="vu">%</div></div>
+          <div class="vbox"><div class="vl">呼吸数</div><div class="vv">16</div><div class="vu">/min</div></div>
+        </div>
+        <div id="alg-box" class="alg" style="display:none">
+          <div class="alg-ic">⚠</div>
+          <div><div class="alg-tx">【薬剤アレルギー登録あり】処方前に必ず確認してください</div>
+          <div id="alg-det" style="font-size:11px;color:var(--red);margin-top:1px"></div></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="pt">SOAP診察記録 — <span id="soap-pt-name">患者を選択してください</span></div>
+            <div style="display:flex;gap:4px">
+              <button class="btn b-gy b-sm soap-prev-btn">前回参照</button>
+              <button class="btn b-gy b-sm soap-tpl-btn">テンプレート</button>
+              <button class="btn b-bl b-sm" onclick="saveSoap()">保存 (F2)</button>
+            </div>
+          </div>
+          <div class="pb" style="padding:4px">
+            <div class="soap-g">
+              <div class="soap-b"><div class="soap-lbl">S — 主観的情報（患者の訴え）</div><textarea class="soap-ta" placeholder="主訴・現病歴など"></textarea></div>
+              <div class="soap-b"><div class="soap-lbl">O — 客観的情報（バイタル・検査所見）</div><textarea class="soap-ta" placeholder="身体所見・検査値など"></textarea></div>
+              <div class="soap-b"><div class="soap-lbl">A — アセスメント・診断</div><textarea class="soap-ta" placeholder="病名・ICD-10コードなど"></textarea></div>
+              <div class="soap-b"><div class="soap-lbl">P — プラン（治療方針）</div><textarea class="soap-ta" placeholder="処方・検査オーダー・次回予約など"></textarea></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="pt">過去診療記録</div></div>
+          <div class="pb" style="padding:0">
+            <table class="t"><thead><tr><th>受診日</th><th>診療科</th><th>担当医</th><th>主訴・診断</th><th>処方概要</th><th>状態</th></tr></thead><tbody>
+              <tr><td>2026/03/14</td><td>内科</td><td>山本 龍一</td><td>高血圧定期　BP148/90</td><td>アムロジピン増量</td><td><span class="s s-gr">記録済</span></td></tr>
+              <tr><td>2026/02/28</td><td>内科</td><td>山本 龍一</td><td>糖尿病管理　HbA1c 7.2%</td><td>メトホルミン継続</td><td><span class="s s-gr">記録済</span></td></tr>
+              <tr><td>2026/01/30</td><td>内科</td><td>田中 美希</td><td>定期受診・採血</td><td>継続処方</td><td><span class="s s-gr">記録済</span></td></tr>
+            </tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ORDERS ===== -->
+    <div class="sec" id="sec-orders">
+      <div class="panel">
+        <div class="ph"><div class="pt">オーダー一覧</div><button class="btn b-bl b-sm" onclick="openM('new-order')">＋ オーダー入力 (F3)</button></div>
+        <div class="pb" style="padding:0">
+          <table class="t"><thead><tr><th>発行日時</th><th>患者名</th><th>種別</th><th>内容</th><th>依頼科</th><th>優先度</th><th>状態</th><th>操作</th></tr></thead><tbody id="orders-tbody">
+          </tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== WARD ===== -->
+    <div class="sec" id="sec-ward">
+      <div class="sgrid">
+        <div class="sbox"><div class="sl">総病床数</div><div class="sv">210</div></div>
+        <div class="sbox"><div class="sl">在院患者</div><div class="sv" style="color:var(--blue)">182</div></div>
+        <div class="sbox"><div class="sl">空床数</div><div class="sv" style="color:var(--grn)">28</div></div>
+        <div class="sbox"><div class="sl">本日入院</div><div class="sv">4</div></div>
+        <div class="sbox"><div class="sl">本日退院</div><div class="sv">3</div></div>
+      </div>
+      <div class="panel">
+        <div class="ph">
+          <div class="pt">病床マップ</div>
+          <div style="display:flex;gap:5px;align-items:center">
+            <label style="font-size:11px;color:var(--tx2)">病棟:</label>
+            <select class="fi fi-sel" id="ward-sel" onchange="renderBeds()" style="font-size:11px;width:130px">
+              <option value="2A">2A病棟（内科）</option>
+              <option value="2B">2B病棟（外科）</option>
+              <option value="3A">3A病棟（整形外科）</option>
+              <option value="3B">3B病棟（混合）</option>
+              <option value="ICU">ICU（集中治療室）</option>
+            </select>
+            <button class="btn b-bl b-sm" onclick="openM('admit')">＋ 入院受付</button>
+          </div>
+        </div>
+        <div class="pb">
+          <div id="bed-map"></div>
+          <div style="display:flex;gap:10px;margin-top:5px;font-size:10px;color:var(--tx3)">
+            <span><span style="display:inline-block;width:10px;height:10px;background:#d8eeff;border:1px solid #80b0e0;vertical-align:middle;margin-right:2px"></span>在院</span>
+            <span><span style="display:inline-block;width:10px;height:10px;background:var(--lred);border:1px solid #c08080;vertical-align:middle;margin-right:2px"></span>重症</span>
+            <span><span style="display:inline-block;width:10px;height:10px;background:#fff8cc;border:1px solid #d0b830;vertical-align:middle;margin-right:2px"></span>予約</span>
+            <span><span style="display:inline-block;width:10px;height:10px;background:#f0f4f8;border:1px solid var(--g3);vertical-align:middle;margin-right:2px"></span>空床</span>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ph"><div class="pt">入院患者一覧</div></div>
+        <div class="pb" style="padding:0">
+          <table class="t"><thead><tr><th>病床</th><th>患者名</th><th>年齢</th><th>主病名（ICD-10）</th><th>入院日</th><th>担当医</th><th>担当看護師</th><th>状態</th><th>操作</th></tr></thead><tbody>
+            <tr><td>2A-01</td><td>鈴木 花子</td><td>52 女</td><td>胃癌術後 (C16.0)</td><td>03/20</td><td>中島部長</td><td>佐々木 NS長</td><td><span class="s s-gr">安定</span></td><td><button class="btn b-gy b-sm ward-chart-btn">カルテ</button></td></tr>
+            <tr><td>2A-08</td><td>木村 誠</td><td>63 男</td><td>慢性心不全急性増悪 (I50.0)</td><td>03/25</td><td>山本部長</td><td>渡辺 NS</td><td><span class="s s-or">経過観察</span></td><td><button class="btn b-gy b-sm ward-chart-btn">カルテ</button></td></tr>
+            <tr class="wn"><td>3B-12</td><td>田中 良子</td><td>71 女</td><td>大腿骨骨折術後 (S72.0)</td><td>03/22</td><td>高橋医師</td><td>中田 NS</td><td><span class="s s-bl">リハビリ</span></td><td><button class="btn b-gy b-sm ward-chart-btn">カルテ</button></td></tr>
+            <tr class="em"><td>ICU-3</td><td>佐藤 一郎</td><td>74 男</td><td>脳梗塞急性期 (I63.9)</td><td>03/27</td><td>山本部長</td><td>松田 NS</td><td><span class="s s-rd">重症</span></td><td><button class="btn b-gy b-sm ward-chart-btn">カルテ</button></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== RX ===== -->
+    <div class="sec" id="sec-rx">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+        <div class="panel">
+          <div class="ph"><div class="pt">処方オーダー一覧</div><button class="btn b-bl b-sm" onclick="openM('new-rx')">＋ 処方入力</button></div>
+          <div class="pb" style="padding:0">
+            <table class="t"><thead><tr><th>患者名</th><th>薬剤名</th><th>用法</th><th>日数</th><th>状態</th><th>操作</th></tr></thead><tbody id="rx-tbody">
+            </tbody></table>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="pt">投薬実施記録（病棟）</div></div>
+          <div class="pb" style="padding:0">
+            <table class="t"><thead><tr><th>時刻</th><th>患者名</th><th>病床</th><th>薬剤</th><th>実施者</th><th>状態</th><th>操作</th></tr></thead><tbody id="med-tbody">
+            </tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== LABS ===== -->
+    <div class="sec" id="sec-labs">
+      <div class="panel">
+        <div class="ph"><div class="pt">検査結果一覧</div></div>
+        <div class="pb" style="padding:0">
+          <table class="t"><thead><tr><th>報告日時</th><th>患者名</th><th>検査種別</th><th>異常項目</th><th>担当医</th><th>レポート</th></tr></thead><tbody>
+            <tr><td>10:15</td><td>佐藤 太郎</td><td>血液一般・生化学</td><td><span class="s s-or">Hb 低下↓</span> <span class="s s-rd">HbA1c 高↑↑</span></td><td>山本 龍一</td><td><button class="btn b-gy b-sm" onclick="openM('lab-result')">表示</button></td></tr>
+            <tr class="wn"><td>09:50</td><td>鈴木 花子</td><td>CBC（緊急）</td><td><span class="s s-rd">Hb 6.2↓↓</span></td><td>中島 健太</td><td><button class="btn b-gy b-sm" onclick="openM('lab-result')">表示</button></td></tr>
+            <tr><td>09:30</td><td>山田 健二</td><td>肺機能検査</td><td><span class="s s-or">FEV1 低下</span></td><td>加藤</td><td><button class="btn b-gy b-sm" onclick="openM('lab-result')">表示</button></td></tr>
+            <tr><td>昨日</td><td>田中 良子</td><td>骨密度（DXA）</td><td><span class="s s-or">T-score −2.8</span></td><td>高橋 さくら</td><td><button class="btn b-gy b-sm" onclick="openM('lab-result')">表示</button></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== BILLING ===== -->
+    <div class="sec" id="sec-bill">
+      <div class="sgrid">
+        <div class="sbox"><div class="sl">本日収益</div><div class="sv" style="color:var(--blue);font-size:14px">¥4,284,500</div></div>
+        <div class="sbox"><div class="sl">未収金</div><div class="sv" style="color:var(--red);font-size:14px">¥1,342,000</div></div>
+        <div class="sbox"><div class="sl">今月レセプト件数</div><div class="sv">3,847</div></div>
+        <div class="sbox"><div class="sl">審査返戻件数</div><div class="sv" style="color:var(--org)">34</div></div>
+        <div class="sbox"><div class="sl">本日未会計</div><div class="sv" style="color:var(--org)">8</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+        <div class="panel">
+          <div class="ph"><div class="pt">会計一覧</div><button class="btn b-bl b-sm" onclick="openM('billing-m')">＋ 会計発行</button></div>
+          <div class="pb" style="padding:0">
+            <table class="t"><thead><tr><th>患者名</th><th>診療内容</th><th>点数</th><th>患者負担</th><th>保険</th><th>状態</th></tr></thead><tbody>
+              <tr><td>佐藤 太郎</td><td>内科外来・採血・処方</td><td>1,240点</td><td>¥3,720</td><td>社保 3割</td><td><span class="s s-gr">会計済</span></td></tr>
+              <tr><td>山田 健二</td><td>外来・肺機能検査</td><td>1,580点</td><td>¥4,740</td><td>国保 3割</td><td><span class="s s-or">未会計</span></td></tr>
+              <tr><td>中村 誠</td><td>初診・頭部 MRI</td><td>3,240点</td><td>¥9,720</td><td>社保 3割</td><td><span class="s s-or">未会計</span></td></tr>
+              <tr><td>田中 良子</td><td>入院基本料＋手術管理</td><td>8,640点</td><td>¥8,640</td><td>後期高齢 1割</td><td><span class="s s-gr">会計済</span></td></tr>
+            </tbody></table>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="pt">レセプト管理（2026年3月分）</div></div>
+          <div class="pb" style="padding:0">
+            <table class="t"><thead><tr><th>保険種別</th><th>件数</th><th>総点数</th><th>請求額</th><th>状態</th></tr></thead><tbody>
+              <tr><td>社会保険</td><td>1,412件</td><td>2,824,300点</td><td>¥84,729,000</td><td><span class="s s-gr">請求済</span></td></tr>
+              <tr><td>国民健康保険</td><td>985件</td><td>1,540,100点</td><td>¥46,203,000</td><td><span class="s s-gr">請求済</span></td></tr>
+              <tr><td>後期高齢者医療</td><td>1,138件</td><td>2,321,400点</td><td>¥69,642,000</td><td><span class="s s-yl">審査中</span></td></tr>
+              <tr class="wn"><td>労災・自費</td><td>312件</td><td>228,600点</td><td>¥6,858,000</td><td><span class="s s-gy">未請求</span></td></tr>
+            </tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== STAFF ===== -->
+    <div class="sec" id="sec-staff">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+        <div class="panel">
+          <div class="ph"><div class="pt">スタッフ一覧</div><button class="btn b-bl b-sm" onclick="openM('new-staff')">＋ スタッフ追加</button></div>
+          <div class="pb" style="padding:0">
+            <table class="t"><thead><tr><th>氏名</th><th>職種</th><th>担当科</th><th>担当患者</th><th>権限</th><th>操作</th></tr></thead><tbody id="staff-tbody">
+            </tbody></table>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div class="pt">診療科一覧</div></div>
+          <div class="pb" style="padding:0">
+            <table class="t"><thead><tr><th>診療科</th><th>医師</th><th>病棟</th><th>外来日</th></tr></thead><tbody>
+              <tr><td>内科</td><td>山本 / 田中</td><td>2A病棟</td><td>月〜土</td></tr>
+              <tr><td>外科</td><td>中島 / 吉田</td><td>2B病棟</td><td>月〜金</td></tr>
+              <tr><td>整形外科</td><td>高橋 / 小川</td><td>3A病棟</td><td>月・水・金</td></tr>
+              <tr><td>循環器科</td><td>大野 / 前田</td><td>3B / ICU</td><td>月〜金</td></tr>
+              <tr><td>脳神経外科</td><td>西田</td><td>4A病棟</td><td>火・木</td></tr>
+              <tr><td>呼吸器科</td><td>加藤</td><td>2A病棟</td><td>月・水・金</td></tr>
+              <tr><td>神経内科</td><td>伊藤</td><td>外来のみ</td><td>火・金</td></tr>
+              <tr><td>放射線科</td><td>橋本</td><td>—</td><td>月〜金</td></tr>
+            </tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- ca -->
+</div><!-- rp -->
+</div><!-- main -->
+</div><!-- root -->
+
+<!-- ===== MODALS ===== -->
+<div class="mw" id="mo-new-order"><div class="mb">
+  <div class="mh"><span>オーダー入力</span><button class="sys-hdr-btn" onclick="closeM('new-order')">✕ 閉じる</button></div>
+  <div class="mbd">
+    <div class="fr"><span class="fl req">患者名</span><input class="fi fi-m" placeholder="患者名 / ID 検索"></div>
+    <div class="fr"><span class="fl req">オーダー種別</span><select class="fi fi-sel fi-m"><option>血液検査（CBC・生化学）</option><option>尿検査</option><option>胸部 X 線</option><option>腹部 CT（造影）</option><option>頭部 MRI</option><option>12誘導心電図</option><option>肺機能検査</option><option>超音波（腹部）</option><option>骨密度測定（DXA）</option></select></div>
+    <div class="fr"><span class="fl req">優先度</span><select class="fi fi-sel fi-s"><option>通常</option><option>至急</option><option>緊急</option></select></div>
+    <div class="fr"><span class="fl">実施希望日時</span><input class="fi fi-m" type="datetime-local"></div>
+    <div class="fr"><span class="fl">コメント</span><textarea class="fi fi-ta" style="flex:1" placeholder="臨床情報・注意事項"></textarea></div>
+  </div>
+  <div class="mf"><button class="btn b-gy" onclick="closeM('new-order')">キャンセル</button><button class="btn b-bl" onclick="closeM('new-order');toast('オーダーを発行しました')">発行 (F5)</button></div>
+</div></div>
+
+<div class="mw" id="mo-admit"><div class="mb">
+  <div class="mh"><span>入院受付</span><button class="sys-hdr-btn" onclick="closeM('admit')">✕ 閉じる</button></div>
+  <div class="mbd">
+    <div class="fr"><span class="fl req">患者名</span><input class="fi fi-m" placeholder="患者名 / ID 検索"></div>
+    <div class="fr"><span class="fl req">病棟</span><select class="fi fi-sel fi-m"><option>2A病棟（内科）</option><option>2B病棟（外科）</option><option>3A病棟（整形外科）</option><option>3B病棟（混合）</option><option>ICU</option></select></div>
+    <div class="fr"><span class="fl req">病床番号</span><input class="fi fi-s" placeholder="01"></div>
+    <div class="fr"><span class="fl req">入院日</span><input class="fi fi-m" type="date"></div>
+    <div class="fr"><span class="fl req">担当医</span><select class="fi fi-sel fi-m"><option>山本 龍一</option><option>田中 美希</option><option>中島 健太</option><option>高橋 さくら</option></select></div>
+    <div class="fr"><span class="fl">入院病名</span><textarea class="fi fi-ta" style="flex:1" placeholder="病名・ICD-10コード"></textarea></div>
+  </div>
+  <div class="mf"><button class="btn b-gy" onclick="closeM('admit')">キャンセル</button><button class="btn b-bl" onclick="closeM('admit');toast('入院受付が完了しました')">受付 (F5)</button></div>
+</div></div>
+
+<div class="mw" id="mo-new-rx"><div class="mb">
+  <div class="mh"><span>処方入力</span><button class="sys-hdr-btn" onclick="closeM('new-rx')">✕ 閉じる</button></div>
+  <div class="mbd">
+    <div class="alg"><div class="alg-ic">⚠</div><div class="alg-tx">【警告】この患者にアレルギー登録があります。処方前に確認してください。</div></div>
+    <div class="fr"><span class="fl req">薬剤名</span><input class="fi fi-l" placeholder="薬剤名 / 薬品コード検索"></div>
+    <div class="fr"><span class="fl req">用量</span><input class="fi fi-s" placeholder="1T"></div>
+    <div class="fr"><span class="fl req">用法</span><select class="fi fi-sel fi-m"><option>1日1回 朝食後</option><option>1日2回 朝夕食後</option><option>1日3回 毎食後</option><option>就寝前</option><option>頓服</option><option>点滴静注</option></select></div>
+    <div class="fr"><span class="fl req">処方日数</span><input class="fi fi-s" placeholder="28"></div>
+    <div class="fr"><span class="fl">投与経路</span><select class="fi fi-sel fi-m"><option>経口</option><option>点滴静注</option><option>筋肉注射</option><option>皮下注射</option><option>外用</option></select></div>
+  </div>
+  <div class="mf"><button class="btn b-gy" onclick="closeM('new-rx')">キャンセル</button><button class="btn b-rd b-sm">削除</button><button class="btn b-bl" onclick="closeM('new-rx');toast('処方を保存しました')">保存 (F5)</button></div>
+</div></div>
+
+<div class="mw" id="mo-billing-m"><div class="mb">
+  <div class="mh"><span>会計・領収書発行</span><button class="sys-hdr-btn" onclick="closeM('billing-m')">✕ 閉じる</button></div>
+  <div class="mbd">
+    <div class="fr" style="margin-bottom:8px"><span class="fl req">患者</span><select class="fi fi-sel fi-l"><option>山田 健二（P003871）</option><option>中村 誠（P006342）</option></select></div>
+    <div class="rc-sec"><div class="rc-hd">【診察料】</div>
+      <div class="rc-row"><span>初診料</span><span>288点</span></div>
+      <div class="rc-row"><span>外来管理加算</span><span>52点</span></div>
+    </div>
+    <div class="rc-sec"><div class="rc-hd">【検査料】</div>
+      <div class="rc-row"><span>血液一般（CBC）</span><span>160点</span></div>
+      <div class="rc-row"><span>生化学検査（Ⅰ）</span><span>280点</span></div>
+      <div class="rc-row"><span>頭部 MRI（造影なし）</span><span>1,620点</span></div>
+    </div>
+    <div class="rc-sec"><div class="rc-hd">【処方料】</div>
+      <div class="rc-row"><span>処方箋料</span><span>68点</span></div>
+    </div>
+    <div class="rc-sec">
+      <div class="rc-row rc-tot"><span>合計点数</span><span>2,468点</span></div>
+      <div class="rc-row rc-tot" style="color:var(--blue)"><span>患者負担（3割）</span><span style="font-size:14px">¥7,404</span></div>
+      <div class="rc-row"><span>保険者請求（7割）</span><span>¥17,276</span></div>
+    </div>
+  </div>
+  <div class="mf"><button class="btn b-gy" onclick="closeM('billing-m')">閉じる</button><button class="btn b-gy">印刷プレビュー</button><button class="btn b-bl" onclick="closeM('billing-m');toast('会計・領収書を発行しました')">発行 (F5)</button></div>
+</div></div>
+
+<div class="mw" id="mo-new-pt"><div class="mb">
+  <div class="mh"><span>新患登録</span><button class="sys-hdr-btn" onclick="closeM('new-pt')">✕ 閉じる</button></div>
+  <div class="mbd">
+    <div class="fr"><span class="fl req">氏名（姓）</span><input class="fi fi-m" placeholder="山田"></div>
+    <div class="fr"><span class="fl req">氏名（名）</span><input class="fi fi-m" placeholder="太郎"></div>
+    <div class="fr"><span class="fl">フリガナ</span><input class="fi fi-l" placeholder="ヤマダ タロウ"></div>
+    <div class="fr"><span class="fl req">生年月日</span><input class="fi fi-m" type="date"></div>
+    <div class="fr"><span class="fl req">性別</span><select class="fi fi-sel fi-s"><option>男性</option><option>女性</option></select></div>
+    <div class="fr"><span class="fl req">担当科</span><select class="fi fi-sel fi-m"><option>内科</option><option>外科</option><option>整形外科</option><option>循環器科</option><option>呼吸器科</option><option>神経内科</option></select></div>
+    <div class="fr"><span class="fl req">保険証番号</span><input class="fi fi-m"></div>
+    <div class="fr"><span class="fl">保険種別</span><select class="fi fi-sel fi-m"><option>社会保険</option><option>国民健康保険</option><option>後期高齢者医療</option><option>労災</option><option>自費</option></select></div>
+    <div class="fr"><span class="fl">アレルギー</span><input class="fi fi-l" placeholder="薬剤アレルギー・禁忌事項"></div>
+    <div class="fr"><span class="fl">既往歴</span><textarea class="fi fi-ta" style="flex:1" placeholder="既往歴・手術歴など"></textarea></div>
+  </div>
+  <div class="mf"><button class="btn b-gy" onclick="closeM('new-pt')">キャンセル</button><button class="btn b-bl" onclick="closeM('new-pt');toast('患者を登録しました')">登録 (F5)</button></div>
+</div></div>
+
+<div class="mw" id="mo-lab-result"><div class="mb">
+  <div class="mh"><span>検査結果詳細 — 佐藤 太郎 / P001234</span><button class="sys-hdr-btn" onclick="closeM('lab-result')">✕ 閉じる</button></div>
+  <div class="mbd">
+    <div style="font-size:11px;margin-bottom:8px;color:var(--tx2)">採取: 2026/03/28 09:10 ｜ 依頼科: 内科 ｜ 依頼医: 山本 龍一</div>
+    <table class="t"><thead><tr><th>検査項目</th><th>結果値</th><th>単位</th><th>基準値</th><th>判定</th></tr></thead><tbody>
+      <tr><td>WBC</td><td>6.2</td><td>×10³/µL</td><td>3.3〜8.6</td><td><span class="s s-gr">正常</span></td></tr>
+      <tr class="wn"><td>Hb</td><td>11.8</td><td>g/dL</td><td>13.5〜17.0</td><td><span class="s s-or">低↓</span></td></tr>
+      <tr><td>PLT</td><td>198</td><td>×10³/µL</td><td>158〜348</td><td><span class="s s-gr">正常</span></td></tr>
+      <tr class="em"><td>HbA1c</td><td>8.1</td><td>%</td><td>4.6〜6.2</td><td><span class="s s-rd">高↑↑</span></td></tr>
+      <tr><td>BUN</td><td>18</td><td>mg/dL</td><td>8〜20</td><td><span class="s s-gr">正常</span></td></tr>
+      <tr><td>Cr</td><td>1.0</td><td>mg/dL</td><td>0.6〜1.1</td><td><span class="s s-gr">正常</span></td></tr>
+      <tr class="wn"><td>LDL-C</td><td>148</td><td>mg/dL</td><td>＜120</td><td><span class="s s-rd">高↑</span></td></tr>
+    </tbody></table>
+  </div>
+  <div class="mf"><button class="btn b-gy" onclick="closeM('lab-result')">閉じる</button><button class="btn b-gy">印刷</button><button class="btn b-bl" onclick="closeM('lab-result');goT('chart')">カルテに反映</button></div>
+</div></div>
+
+<div class="mw" id="mo-new-staff"><div class="mb">
+  <div class="mh"><span>スタッフ追加</span><button class="sys-hdr-btn" onclick="closeM('new-staff')">✕ 閉じる</button></div>
+  <div class="mbd">
+    <div class="fr"><span class="fl req">氏名</span><input class="fi fi-l" placeholder="山本 太郎"></div>
+    <div class="fr"><span class="fl req">職種</span><select class="fi fi-sel fi-m"><option>医師</option><option>看護師</option><option>薬剤師</option><option>検査技師</option><option>放射線技師</option><option>事務</option></select></div>
+    <div class="fr"><span class="fl req">担当科</span><select class="fi fi-sel fi-m"><option>内科</option><option>外科</option><option>整形外科</option><option>循環器科</option><option>薬剤部</option></select></div>
+    <div class="fr"><span class="fl req">権限</span><select class="fi fi-sel fi-m"><option>管理者</option><option>医師</option><option>看護師長</option><option>看護師</option><option>薬剤師</option><option>閲覧のみ</option></select></div>
+  </div>
+  <div class="mf"><button class="btn b-gy" onclick="closeM('new-staff')">キャンセル</button><button class="btn b-bl" onclick="submitStaff()">追加 (F5)</button></div>
+</div></div>
+
+<div class="mw" id="mo-settings"><div class="mb" style="min-width:300px">
+  <div class="mh"><span>システム設定</span><button class="sys-hdr-btn" onclick="closeM('settings')">✕ 閉じる</button></div>
+  <div class="mbd"><p style="font-size:11px;color:var(--tx2);line-height:1.8">端末設定 / プリンタ設定 / 通知設定 / バックアップ設定 / ユーザー権限管理</p></div>
+  <div class="mf"><button class="btn b-gy" onclick="closeM('settings')">閉じる</button></div>
+</div></div>
+
+<div class="toast" id="toast-msg"></div>
+
+<!-- ===== EXTRA MODALS (fully functional) ===== -->
+
+<!-- 前回参照 -->
+<div class="mw" id="mo-prev-rec"><div class="mb">
+  <div class="mh"><span>前回診察記録の参照</span><button class="sys-hdr-btn" onclick="closeM('prev-rec')">✕ 閉じる</button></div>
+  <div class="mbd">
+    <div style="font-size:11px;color:var(--tx2);margin-bottom:8px">2026/03/14 ｜ 内科 ｜ 山本 龍一</div>
+    <div style="background:var(--g0);border:1px solid var(--g3);padding:8px;font-size:11px;line-height:1.8">
+      <b>S:</b> 血圧が高め。少し疲れやすい。<br>
+      <b>O:</b> BP 148/90, HR 78, BT 36.2, SpO2 98%。浮腫なし。<br>
+      <b>A:</b> 高血圧症（管理中）。血圧コントロール不良。<br>
+      <b>P:</b> アムロジピン 5mg → 10mg に増量。2週後再診。
+    </div>
+  </div>
+  <div class="mf"><button class="btn b-gy" onclick="closeM('prev-rec')">閉じる</button><button class="btn b-bl" onclick="closeM('prev-rec');copyPrevRec()">カルテに転記</button></div>
+</div></div>
+
+<!-- テンプレート選択 -->
+<div class="mw" id="mo-template"><div class="mb">
+  <div class="mh"><span>SOAPテンプレート選択</span><button class="sys-hdr-btn" onclick="closeM('template')">✕ 閉じる</button></div>
+  <div class="mbd">
+    <div style="font-size:11px;color:var(--tx2);margin-bottom:8px">使用するテンプレートを選択してください</div>
+    <div id="tpl-list"></div>
+  </div>
+  <div class="mf"><button class="btn b-gy" onclick="closeM('template')">キャンセル</button></div>
+</div></div>
+
+<!-- 印刷プレビュー -->
+<div class="mw" id="mo-print"><div class="mb" style="max-width:640px">
+  <div class="mh"><span>印刷プレビュー</span><button class="sys-hdr-btn" onclick="closeM('print')">✕ 閉じる</button></div>
+  <div class="mbd">
+    <div style="border:1px solid var(--g3);padding:16px;font-size:11px;line-height:1.8;background:#fff">
+      <div style="text-align:center;font-size:14px;font-weight:bold;margin-bottom:12px">横浜大学附属病院　領収書</div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <span>患者名: <b id="print-name">—</b></span>
+        <span>発行日: 2026/03/28</span>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:11px">
+        <thead><tr><th style="border:1px solid #ccc;padding:4px;background:#f0f4f8">項目</th><th style="border:1px solid #ccc;padding:4px;background:#f0f4f8">点数</th><th style="border:1px solid #ccc;padding:4px;background:#f0f4f8">金額</th></tr></thead>
+        <tbody id="print-rows"></tbody>
+      </table>
+      <div style="margin-top:10px;text-align:right;font-size:13px;font-weight:bold" id="print-total"></div>
+    </div>
+  </div>
+  <div class="mf"><button class="btn b-gy" onclick="closeM('print')">閉じる</button><button class="btn b-bl" onclick="window.print();toast('印刷を送信しました')">印刷実行</button></div>
+</div></div>
+
+<!-- ベッドクリック詳細 -->
+<div class="mw" id="mo-bed-detail"><div class="mb" style="min-width:340px">
+  <div class="mh"><span id="bd-title">病床詳細</span><button class="sys-hdr-btn" onclick="closeM('bed-detail')">✕ 閉じる</button></div>
+  <div class="mbd" id="bd-body"></div>
+  <div class="mf" id="bd-footer"></div>
+</div></div>
+
+<!-- スケジュール追加 -->
+<div class="mw" id="mo-schedule"><div class="mb">
+  <div class="mh"><span>予約追加</span><button class="sys-hdr-btn" onclick="closeM('schedule')">✕ 閉じる</button></div>
+  <div class="mbd">
+    <div class="fr"><span class="fl req">患者名</span><input class="fi fi-m" id="sch-name" placeholder="患者名 / ID 検索"></div>
+    <div class="fr"><span class="fl req">担当医</span><select class="fi fi-sel fi-m" id="sch-doc"><option>山本 龍一</option><option>田中 美希</option><option>中島 健太</option><option>高橋 さくら</option></select></div>
+    <div class="fr"><span class="fl req">日付</span><input class="fi fi-m" type="date" id="sch-date"></div>
+    <div class="fr"><span class="fl req">時刻</span><select class="fi fi-sel fi-s" id="sch-time"><option>09:00</option><option>09:30</option><option>10:00</option><option>10:30</option><option>11:00</option><option>11:30</option><option>14:00</option><option>14:30</option><option>15:00</option></select></div>
+    <div class="fr"><span class="fl">診察内容</span><input class="fi fi-l" id="sch-note" placeholder="定期受診、検査など"></div>
+  </div>
+  <div class="mf"><button class="btn b-gy" onclick="closeM('schedule')">キャンセル</button><button class="btn b-bl" onclick="addSchedule()">予約登録</button></div>
+</div></div>
+
+<!-- ログアウト確認 -->
+<div class="mw" id="mo-logout"><div class="mb" style="min-width:300px;max-width:360px">
+  <div class="mh"><span>ログアウト確認</span><button class="sys-hdr-btn" onclick="closeM('logout')">✕ 閉じる</button></div>
+  <div class="mbd"><p style="font-size:12px;line-height:1.8;color:var(--tx2)">ログアウトしますか？<br>未保存の入力内容は失われます。</p></div>
+  <div class="mf"><button class="btn b-gy" onclick="closeM('logout')">キャンセル</button><button class="btn b-rd" onclick="closeM('logout');toast('ログアウトしました')">ログアウト</button></div>
+</div></div>
+
+<!-- アラート対応 -->
+<div class="mw" id="mo-alert-action"><div class="mb" style="min-width:360px">
+  <div class="mh"><span id="alert-modal-title">アラート対応</span><button class="sys-hdr-btn" onclick="closeM('alert-action')">✕ 閉じる</button></div>
+  <div class="mbd" id="alert-modal-body"></div>
+  <div class="mf"><button class="btn b-gy" onclick="closeM('alert-action')">閉じる</button><button class="btn b-bl" id="alert-modal-ok" onclick="closeM('alert-action');toast('対応を記録しました')">対応済みにする</button></div>
+</div></div>
+
+<!-- 患者検索 -->
+<div class="mw" id="mo-search"><div class="mb">
+  <div class="mh"><span>患者検索</span><button class="sys-hdr-btn" onclick="closeM('search')">✕ 閉じる</button></div>
+  <div class="mbd">
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <input class="fi" style="flex:1" id="search-input" placeholder="患者名・患者ID・病名で検索..." oninput="doSearch()">
+      <button class="btn b-bl" onclick="doSearch()">検索</button>
+    </div>
+    <div id="search-results"></div>
+  </div>
+  <div class="mf"><button class="btn b-gy" onclick="closeM('search')">閉じる</button></div>
+</div></div>
+
+<!-- 投薬実施 -->
+<div class="mw" id="mo-med-record"><div class="mb" style="min-width:340px">
+  <div class="mh"><span>投薬実施記録</span><button class="sys-hdr-btn" onclick="closeM('med-record')">✕ 閉じる</button></div>
+  <div class="mbd">
+    <div style="background:var(--lred);border:1px solid var(--red);padding:6px 10px;font-size:11px;color:var(--red);font-weight:bold;margin-bottom:10px">⚠ 14:00 田中 良子（3B-12）— 鎮痛剤内服が未実施です</div>
+    <div class="fr"><span class="fl">実施者</span><select class="fi fi-sel fi-m"><option>中田 NS</option><option>佐々木 NS長</option><option>渡辺 NS</option></select></div>
+    <div class="fr"><span class="fl">実施時刻</span><input class="fi fi-s" type="time" value="14:15"></div>
+    <div class="fr"><span class="fl">備考</span><input class="fi fi-l" placeholder="特記事項があれば入力"></div>
+  </div>
+  <div class="mf"><button class="btn b-gy" onclick="closeM('med-record')">キャンセル</button><button class="btn b-bl" onclick="closeM('med-record');markMedDone()">実施済みに更新</button></div>
+</div></div>
+
+<script>
+'use strict';
+
+/* ===========================
+   DATA
+=========================== */
+const BEDS={
+  '2A':[{n:'01',p:'鈴木 花子',s:'occ'},{n:'02',p:'木村 誠',s:'occ'},{n:'03',p:'',s:'emp'},{n:'04',p:'伊藤 清',s:'occ'},{n:'05',p:'',s:'emp'},{n:'06',p:'松本 妙子',s:'occ'},{n:'07',p:'',s:'emp'},{n:'08',p:'',s:'res'},{n:'09',p:'橋本 健',s:'occ'},{n:'10',p:'',s:'emp'},{n:'11',p:'斎藤 良',s:'occ'},{n:'12',p:'',s:'emp'},{n:'13',p:'村井 恵',s:'occ'},{n:'14',p:'',s:'emp'},{n:'15',p:'田代 誠',s:'occ'},{n:'16',p:'',s:'res'}],
+  '2B':[{n:'01',p:'前田 義',s:'occ'},{n:'02',p:'',s:'emp'},{n:'03',p:'石川 里',s:'occ'},{n:'04',p:'',s:'res'},{n:'05',p:'永田 茂',s:'occ'},{n:'06',p:'',s:'emp'},{n:'07',p:'',s:'emp'},{n:'08',p:'林 幸子',s:'occ'},{n:'09',p:'',s:'emp'},{n:'10',p:'坂本 隆',s:'occ'}],
+  '3A':[{n:'01',p:'村田 誠',s:'occ'},{n:'02',p:'',s:'emp'},{n:'03',p:'',s:'emp'},{n:'04',p:'安田 光',s:'occ'},{n:'05',p:'吉田 正',s:'occ'},{n:'06',p:'',s:'res'},{n:'07',p:'',s:'emp'},{n:'08',p:'池田 恵',s:'occ'}],
+  '3B':[{n:'01',p:'',s:'emp'},{n:'02',p:'中田 博',s:'occ'},{n:'03',p:'',s:'emp'},{n:'04',p:'福田 歌',s:'occ'},{n:'05',p:'',s:'emp'},{n:'06',p:'',s:'emp'},{n:'07',p:'岡田 一',s:'occ'},{n:'08',p:'',s:'res'},{n:'09',p:'',s:'emp'},{n:'10',p:'松井 仁',s:'occ'},{n:'11',p:'',s:'emp'},{n:'12',p:'田中 良子',s:'occ'}],
+  'ICU':[{n:'1',p:'佐藤 一郎',s:'iem'},{n:'2',p:'',s:'emp'},{n:'3',p:'中野 正',s:'occ'},{n:'4',p:'',s:'res'},{n:'5',p:'',s:'emp'},{n:'6',p:'西田 幸',s:'occ'}]
+};
+const BED_CLS={occ:'b-occ',emp:'b-emp',res:'b-res',iem:'b-iem'};
+
+const PT_DB=[
+  {name:'佐藤 太郎',id:'P001234',kana:'サトウ タロウ',meta:'68歳 男',dept:'内科',dx:'高血圧・2型糖尿病',alg:'アスピリン禁忌',type:'入院'},
+  {name:'鈴木 花子',id:'P002415',kana:'スズキ ハナコ',meta:'52歳 女',dept:'外科',dx:'胃癌術後',alg:'なし',type:'入院'},
+  {name:'山田 健二',id:'P003871',kana:'ヤマダ ケンジ',meta:'45歳 男',dept:'呼吸器科',dx:'気管支喘息',alg:'なし',type:'外来'},
+  {name:'田中 良子',id:'P005128',kana:'タナカ ヨシコ',meta:'71歳 女',dept:'整形外科',dx:'大腿骨骨折術後',alg:'なし',type:'入院'},
+  {name:'中村 誠',id:'P006342',kana:'ナカムラ マコト',meta:'38歳 男',dept:'神経内科',dx:'初診(頭痛)',alg:'なし',type:'外来'},
+  {name:'木村 誠',id:'P007211',kana:'キムラ マコト',meta:'63歳 男',dept:'循環器科',dx:'慢性心不全',alg:'なし',type:'入院'}
+];
+
+const TEMPLATES=[
+  {name:'高血圧定期受診', s:'血圧が高め。めまいが続いている。', o:'BP: / , HR: , BT: , SpO2: %', a:'高血圧症　管理継続', p:'継続処方。2週後再診。'},
+  {name:'糖尿病定期受診', s:'空腹時血糖が高め。', o:'HbA1c: %, FBS: mg/dL', a:'2型糖尿病　血糖コントロール', p:'食事・運動指導。継続処方。'},
+  {name:'喘息定期受診', s:'息切れあり。', o:'SpO2: %, FEV1: %', a:'気管支喘息　発作なし', p:'吸入薬継続。次回1か月後。'},
+  {name:'術後フォロー', s:'創部の痛みは軽快。食欲回復。', o:'創部：問題なし。採血：', a:'術後経過良好', p:'次回外来。傷の経過良好。'},
+  {name:'初診', s:'', o:'BP: , HR: , BT: , SpO2: %', a:'', p:'精査中。検査結果で方針決定。'}
+];
+
+const SCHEDULES=[
+  {time:'09:00',name:'佐藤 太郎',doc:'山本部長',note:'定期受診・採血',status:'s-gr',statusTx:'診察済'},
+  {time:'09:30',name:'鈴木 花子',doc:'中島部長',note:'術後フォロー',status:'s-gr',statusTx:'診察済'},
+  {time:'10:00',name:'山田 健二',doc:'山本部長',note:'喘息定期受診',status:'s-bl',statusTx:'診察中'},
+  {time:'10:30',name:'田中 良子',doc:'高橋医師',note:'骨折経過',status:'s-or',statusTx:'待合中'},
+  {time:'11:00',name:'中村 誠',doc:'山本部長',note:'初診・頭痛',status:'s-or',statusTx:'待合中'},
+  {time:'11:30',name:'小林 みどり',doc:'田中医師',note:'処方更新',status:'s-gy',statusTx:'予約'}
+];
+
+const ORDERS=[
+  {time:'10:05',name:'山田 健二',type:'検査',content:'肺機能検査',dept:'呼吸器科',pri:'s-rd',priTx:'至急',sts:'s-or',stsTx:'待機中'},
+  {time:'09:10',name:'佐藤 太郎',type:'検査',content:'血液一般・生化・HbA1c',dept:'内科',pri:'s-bl',priTx:'通常',sts:'s-gr',stsTx:'結果済'},
+  {time:'09:45',name:'鈴木 花子',type:'放射線',content:'腹部造影CT',dept:'外科',pri:'s-rd',priTx:'至急',sts:'s-bl',stsTx:'撮影中'},
+  {time:'昨日',name:'田中 良子',type:'検査',content:'骨密度測定(DXA)',dept:'整形外科',pri:'s-bl',priTx:'通常',sts:'s-gy',stsTx:'予約済'},
+  {time:'11:20',name:'木村 誠',type:'生理検査',content:'12誘導心電図・心エコー',dept:'循環器科',pri:'s-rd',priTx:'至急',sts:'s-or',stsTx:'待機中'},
+  {time:'09:00',name:'中村 誠',type:'放射線',content:'頭部MRI(造影なし)',dept:'神経内科',pri:'s-bl',priTx:'通常',sts:'s-gy',stsTx:'予約済'}
+];
+
+const RX_LIST=[
+  {name:'佐藤 太郎',drug:'アムロジピン OD錠 5mg',usage:'1× 朝食後',days:'28日',sts:'s-bl',stsTx:'処方中'},
+  {name:'佐藤 太郎',drug:'メトホルミン塩酸塩錠 500mg',usage:'2× 朝夕食後',days:'28日',sts:'s-bl',stsTx:'処方中'},
+  {name:'田中 良子',drug:'アレンドロン酸Na錠 35mg',usage:'週1回 起床時',days:'継続',sts:'s-bl',stsTx:'処方中'},
+  {name:'木村 誠',drug:'フロセミド注射液 20mg',usage:'点滴静注',days:'—',sts:'s-yl',stsTx:'確認待',warn:true},
+  {name:'鈴木 花子',drug:'セフトリアキソン Na 1g',usage:'点滴 1日1回',days:'7日',sts:'s-bl',stsTx:'処方中'}
+];
+
+const MED_RECORDS=[
+  {time:'08:00',name:'鈴木 花子',bed:'2A-01',drug:'セフトリアキソン 点滴',nurse:'渡辺 NS',sts:'s-gr',stsTx:'実施済'},
+  {time:'10:00',name:'木村 誠',bed:'2A-08',drug:'フロセミド 点滴',nurse:'渡辺 NS',sts:'s-gr',stsTx:'実施済'},
+  {time:'14:00',name:'田中 良子',bed:'3B-12',drug:'鎮痛剤 内服',nurse:'—',sts:'s-rd',stsTx:'未実施',urgent:true},
+  {time:'18:00',name:'佐藤 一郎',bed:'ICU-3',drug:'降圧薬 持続点滴',nurse:'—',sts:'s-gy',stsTx:'予定'}
+];
+
+/* ===========================
+   STATE
+=========================== */
+let currentPt=null;
+
+/* ===========================
+   CORE NAVIGATION
+=========================== */
+function goT(id){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('act'));
+  document.getElementById('sec-'+id).classList.add('act');
+  document.querySelectorAll('.ft').forEach(f=>f.classList.remove('act'));
+  const el=document.getElementById('ft-'+id);
+  if(el)el.classList.add('act');
+  if(id==='ward')renderBeds();
+  if(id==='orders')renderOrders();
+  if(id==='rx')renderRx();
+  if(id==='labs')renderLabs();
+}
+
+function setMB(el){
+  document.querySelectorAll('.mb-item').forEach(m=>m.classList.remove('act'));
+  el.classList.add('act');
+  const map={'外来業務':'db','入院業務':'ward','オーダー入力':'orders','薬剤管理':'rx','検査・放射線':'labs','会計・レセプト':'bill','統計・集計':'db','マスタ管理 ▾':'staff'};
+  const t=map[el.textContent.trim()];
+  if(t)goT(t);
+}
+
+function setLPT(el){
+  document.querySelectorAll('.lpt').forEach(t=>t.classList.remove('act'));
+  el.classList.add('act');
+}
+
+/* ===========================
+   PATIENT SELECTION
+=========================== */
+function selPt(el,name,id,kana,meta,dept,dx,alg,type){
+  currentPt={name,id,kana,meta,dept,dx,alg,type};
+  document.querySelectorAll('.pt-row').forEach(r=>r.classList.remove('act'));
+  if(el)el.classList.add('act');
+  document.getElementById('ph-nm').textContent=name;
+  document.getElementById('ph-kn').textContent=kana+' ｜ '+id;
+  const mEl=document.getElementById('ph-meta');
+  mEl.innerHTML=`<span class="ph-meta">${meta}</span><span class="ph-meta">担当科: <b>${dept}</b></span><span class="ph-meta">主病名: <b>${dx}</b></span><span class="s ${type==='入院'?'s-bl':'s-gr'}">${type}</span>${alg!=='なし'?`<span class="ph-alg">⚠ アレルギー: ${alg}</span>`:''}`;
+  document.getElementById('ph-btns').style.display='flex';
+  document.getElementById('chart-body').style.display='';
+  document.getElementById('no-pt-msg').style.display='none';
+  if(alg!=='なし'){
+    document.getElementById('alg-box').style.display='flex';
+    document.getElementById('alg-det').textContent='禁忌薬: '+alg+' — 詳細はアレルギー台帳を参照';
+  } else {
+    document.getElementById('alg-box').style.display='none';
+  }
+  // Update SOAP header
+  document.getElementById('soap-pt-name').textContent=name+' ('+id+')';
+  goT('chart');
+}
+
+/* ===========================
+   BED MAP
+=========================== */
+function renderBeds(){
+  const k=document.getElementById('ward-sel').value;
+  const arr=BEDS[k]||[];
+  document.getElementById('bed-map').innerHTML='<div class="bedgrid">'+arr.map(b=>{
+    const cls=BED_CLS[b.s]||'b-emp';
+    return `<div class="bed ${cls}" onclick="bedClick('${k}','${b.n}','${b.p||''}','${b.s}')" title="${b.p||'空床'}"><div class="bn">${k}-${b.n}</div><div class="bp">${b.p||'—'}</div></div>`;
+  }).join('')+'</div>';
+}
+
+function bedClick(ward,num,patient,status){
+  const title=document.getElementById('bd-title');
+  const body=document.getElementById('bd-body');
+  const footer=document.getElementById('bd-footer');
+  title.textContent='病床 '+ward+'-'+num+' 詳細';
+  if(status==='emp'){
+    body.innerHTML=`<p style="font-size:12px;color:var(--tx2);padding:4px 0">この病床は現在<b>空床</b>です。</p>`;
+    footer.innerHTML=`<button class="btn b-gy" onclick="closeM('bed-detail')">閉じる</button><button class="btn b-bl" onclick="closeM('bed-detail');openM('admit')">入院受付</button>`;
+  } else if(status==='res'){
+    body.innerHTML=`<p style="font-size:12px;color:var(--tx2);padding:4px 0">この病床は<b>入院予約済み</b>です。</p>`;
+    footer.innerHTML=`<button class="btn b-gy" onclick="closeM('bed-detail')">閉じる</button>`;
+  } else {
+    const cls=status==='iem'?'s-rd':'s-gr';
+    const stsTx=status==='iem'?'重症':'在院';
+    body.innerHTML=`
+      <div class="fr"><span class="fl">患者名</span><b style="font-size:13px">${patient}</b></div>
+      <div class="fr"><span class="fl">病床</span><span>${ward}-${num}</span></div>
+      <div class="fr"><span class="fl">状態</span><span class="s ${cls}">${stsTx}</span></div>`;
+    footer.innerHTML=`<button class="btn b-gy" onclick="closeM('bed-detail')">閉じる</button><button class="btn b-bl" onclick="closeM('bed-detail');openM('new-order')">オーダー</button><button class="btn b-bl" onclick="closeM('bed-detail');loadPatientByName('${patient}')">カルテ</button>`;
+  }
+  openM('bed-detail');
+}
+
+function loadPatientByName(name){
+  const pt=PT_DB.find(p=>p.name===name);
+  if(pt) selPt(null,pt.name,pt.id,pt.kana,pt.meta,pt.dept,pt.dx,pt.alg,pt.type);
+  else toast('患者情報が見つかりません');
+}
+
+/* ===========================
+   ORDERS TABLE (dynamic)
+=========================== */
+function renderOrders(){
+  const tbody=document.getElementById('orders-tbody');
+  if(!tbody)return;
+  tbody.innerHTML=ORDERS.map((o,i)=>`
+    <tr class="${o.pri==='s-rd'?'em':''}">
+      <td>${o.time}</td><td>${o.name}</td><td>${o.type}</td><td>${o.content}</td>
+      <td>${o.dept}</td><td><span class="s ${o.pri}">${o.priTx}</span></td>
+      <td><span class="s ${o.sts}">${o.stsTx}</span></td>
+      <td><button class="btn b-gy b-sm" onclick="orderDetail(${i})">${o.stsTx==='結果済'?'結果':'詳細'}</button></td>
+    </tr>`).join('');
+}
+
+function orderDetail(i){
+  const o=ORDERS[i];
+  if(o.stsTx==='結果済') openM('lab-result');
+  else{
+    document.getElementById('alert-modal-title').textContent='オーダー詳細 — '+o.name;
+    document.getElementById('alert-modal-body').innerHTML=`
+      <div class="fr"><span class="fl">患者名</span><b>${o.name}</b></div>
+      <div class="fr"><span class="fl">種別</span>${o.type}</div>
+      <div class="fr"><span class="fl">内容</span>${o.content}</div>
+      <div class="fr"><span class="fl">優先度</span><span class="s ${o.pri}">${o.priTx}</span></div>
+      <div class="fr"><span class="fl">状態</span><span class="s ${o.sts}">${o.stsTx}</span></div>
+      <div class="fr"><span class="fl">依頼科</span>${o.dept}</div>`;
+    document.getElementById('alert-modal-ok').textContent='完了にする';
+    document.getElementById('alert-modal-ok').onclick=function(){closeM('alert-action');ORDERS[i].sts='s-gr';ORDERS[i].stsTx='完了';renderOrders();toast('オーダーを完了にしました');};
+    openM('alert-action');
+  }
+}
+
+/* ===========================
+   RX TABLE (dynamic)
+=========================== */
+function renderRx(){
+  const tbody=document.getElementById('rx-tbody');
+  if(!tbody)return;
+  tbody.innerHTML=RX_LIST.map((r,i)=>`
+    <tr class="${r.warn?'wn':''}">
+      <td>${r.name}</td><td>${r.drug}</td><td>${r.usage}</td><td>${r.days}</td>
+      <td><span class="s ${r.sts}">${r.stsTx}</span></td>
+      <td><button class="btn b-gy b-sm" onclick="rxDetail(${i})">詳細</button></td>
+    </tr>`).join('');
+  const tbody2=document.getElementById('med-tbody');
+  if(!tbody2)return;
+  tbody2.innerHTML=MED_RECORDS.map((m,i)=>`
+    <tr class="${m.urgent?'em':''}">
+      <td>${m.time}</td><td>${m.name}</td><td>${m.bed}</td><td>${m.drug}</td><td>${m.nurse}</td>
+      <td><span class="s ${m.sts}">${m.stsTx}</span></td>
+      <td>${m.stsTx==='未実施'?`<button class="btn b-rd b-sm" onclick="openM('med-record')">対応</button>`:`<button class="btn b-gy b-sm" onclick="rxRecordDetail(${i})">確認</button>`}</td>
+    </tr>`).join('');
+}
+
+function rxDetail(i){
+  const r=RX_LIST[i];
+  document.getElementById('alert-modal-title').textContent='処方詳細 — '+r.drug;
+  document.getElementById('alert-modal-body').innerHTML=`
+    <div class="fr"><span class="fl">患者名</span><b>${r.name}</b></div>
+    <div class="fr"><span class="fl">薬剤名</span>${r.drug}</div>
+    <div class="fr"><span class="fl">用法</span>${r.usage}</div>
+    <div class="fr"><span class="fl">処方日数</span>${r.days}</div>
+    <div class="fr"><span class="fl">状態</span><span class="s ${r.sts}">${r.stsTx}</span></div>`;
+  document.getElementById('alert-modal-ok').textContent='中止にする';
+  document.getElementById('alert-modal-ok').onclick=function(){closeM('alert-action');RX_LIST[i].sts='s-gy';RX_LIST[i].stsTx='中止';RX_LIST[i].warn=false;renderRx();toast('処方を中止しました');};
+  openM('alert-action');
+}
+
+function rxRecordDetail(i){
+  const m=MED_RECORDS[i];
+  toast(m.time+' '+m.name+' '+m.drug+' — 実施確認済');
+}
+
+function markMedDone(){
+  const idx=MED_RECORDS.findIndex(m=>m.urgent);
+  if(idx>=0){MED_RECORDS[idx].sts='s-gr';MED_RECORDS[idx].stsTx='実施済';MED_RECORDS[idx].nurse='中田 NS';MED_RECORDS[idx].urgent=false;}
+  renderRx();
+  toast('投薬実施記録を更新しました');
+}
+
+/* ===========================
+   LABS TABLE
+=========================== */
+function renderLabs(){
+  /* already static — handled by HTML */
+}
+
+/* ===========================
+   SCHEDULE (dashboard row)
+=========================== */
+function renderScheduleTable(){
+  const tbody=document.getElementById('schedule-tbody');
+  if(!tbody)return;
+  tbody.innerHTML=SCHEDULES.map((sc,i)=>`
+    <tr class="${sc.status==='s-bl'?'h':''}">
+      <td>${sc.time}</td><td>${sc.name}</td><td>${sc.doc}</td><td>${sc.note}</td>
+      <td><span class="s ${sc.status}">${sc.statusTx}</span></td>
+      <td><button class="btn b-gy b-sm" onclick="scheduleRowAct(${i})">対応</button></td>
+    </tr>`).join('');
+}
+
+function scheduleRowAct(i){
+  const sc=SCHEDULES[i];
+  document.getElementById('alert-modal-title').textContent=sc.time+' '+sc.name+' — 受診対応';
+  document.getElementById('alert-modal-body').innerHTML=`
+    <div class="fr"><span class="fl">患者名</span><b>${sc.name}</b></div>
+    <div class="fr"><span class="fl">担当医</span>${sc.doc}</div>
+    <div class="fr"><span class="fl">内容</span>${sc.note}</div>
+    <div class="fr"><span class="fl">現状態</span><span class="s ${sc.status}">${sc.statusTx}</span></div>
+    <div class="fr"><span class="fl">次の状態</span><select class="fi fi-sel fi-m" id="sch-next-sts"><option>診察済</option><option>診察中</option><option>待合中</option><option>キャンセル</option></select></div>`;
+  document.getElementById('alert-modal-ok').textContent='状態を更新';
+  document.getElementById('alert-modal-ok').onclick=function(){
+    const v=document.getElementById('sch-next-sts').value;
+    const map={'診察済':['s-gr','診察済'],'診察中':['s-bl','診察中'],'待合中':['s-or','待合中'],'キャンセル':['s-gy','キャンセル']};
+    SCHEDULES[i].status=map[v][0]; SCHEDULES[i].statusTx=map[v][1];
+    renderScheduleTable(); closeM('alert-action'); toast('状態を「'+v+'」に更新しました');
+  };
+  openM('alert-action');
+}
+
+function addSchedule(){
+  const name=document.getElementById('sch-name').value.trim();
+  const doc=document.getElementById('sch-doc').value;
+  const time=document.getElementById('sch-time').value;
+  const note=document.getElementById('sch-note').value||'外来受診';
+  if(!name){toast('患者名を入力してください');return;}
+  SCHEDULES.push({time,name,doc,note,status:'s-gy',statusTx:'予約'});
+  SCHEDULES.sort((a,b)=>a.time.localeCompare(b.time));
+  renderScheduleTable();
+  closeM('schedule');
+  toast('予約を登録しました：'+name+' '+time);
+  document.getElementById('sch-name').value='';
+  document.getElementById('sch-note').value='';
+}
+
+/* ===========================
+   NEW ORDER (add to list)
+=========================== */
+function submitOrder(){
+  const ptEl=document.querySelector('#mo-new-order .fi[placeholder="患者名 / ID 検索"]');
+  const typeEl=document.querySelector('#mo-new-order .fi-sel');
+  const priEl=document.querySelectorAll('#mo-new-order .fi-sel')[1];
+  const name=ptEl?ptEl.value.trim():(currentPt?currentPt.name:'');
+  const type=typeEl?typeEl.value:'検査';
+  const pri=priEl?priEl.value:'通常';
+  if(!name){toast('患者名を入力してください');return;}
+  ORDERS.unshift({time:'今',name,type:'検査',content:type,dept:'内科',pri:pri==='至急'?'s-rd':pri==='緊急'?'s-rd':'s-bl',priTx:pri,sts:'s-or',stsTx:'待機中'});
+  renderOrders();
+  closeM('new-order');
+  toast('オーダーを発行しました：'+name+' — '+type);
+}
+
+/* ===========================
+   NEW PATIENT (add to list)
+=========================== */
+function submitNewPt(){
+  const nameEl=document.querySelectorAll('#mo-new-pt .fi')[0];
+  const name2El=document.querySelectorAll('#mo-new-pt .fi')[1];
+  const n1=nameEl?nameEl.value.trim():'';
+  const n2=name2El?name2El.value.trim():'';
+  if(!n1||!n2){toast('氏名を入力してください');return;}
+  const fullName=n1+' '+n2;
+  const newId='P'+String(Math.floor(Math.random()*90000+10000));
+  PT_DB.push({name:fullName,id:newId,kana:'',meta:'—',dept:'内科',dx:'新患',alg:'なし',type:'外来'});
+  const lp=document.querySelector('.lp-body');
+  const row=document.createElement('div');
+  row.className='pt-row';
+  const pt=PT_DB[PT_DB.length-1];
+  row.innerHTML=`<div class="pt-nm">${pt.name}</div><div class="pt-id">${pt.id} ｜ —</div><span class="ptag tg-out">外来</span><span class="ptag tg-new">新患</span>`;
+  row.onclick=()=>selPt(row,pt.name,pt.id,pt.kana,pt.meta,pt.dept,pt.dx,pt.alg,pt.type);
+  lp.appendChild(row);
+  closeM('new-pt');
+  toast('患者を登録しました：'+fullName+' ('+newId+')');
+}
+
+/* ===========================
+   ADD RX
+=========================== */
+function submitRx(){
+  const drugEl=document.querySelector('#mo-new-rx input.fi-l');
+  const usageEl=document.querySelector('#mo-new-rx .fi-sel');
+  const daysEl=document.querySelectorAll('#mo-new-rx input.fi-s')[1];
+  const drug=drugEl?drugEl.value.trim():'';
+  if(!drug){toast('薬剤名を入力してください');return;}
+  const ptName=currentPt?currentPt.name:'不明';
+  RX_LIST.unshift({name:ptName,drug,usage:usageEl?usageEl.value:'1日1回 朝食後',days:daysEl?daysEl.value+'日':'28日',sts:'s-bl',stsTx:'処方中'});
+  renderRx();
+  closeM('new-rx');
+  toast('処方を追加しました：'+drug);
+}
+
+/* ===========================
+   ADMIT
+=========================== */
+function submitAdmit(){
+  const ptEl=document.querySelector('#mo-admit .fi[placeholder="患者名 / ID 検索"]');
+  const wardEl=document.querySelector('#mo-admit .fi-sel');
+  const bedEl=document.querySelector('#mo-admit .fi-s');
+  const name=ptEl?ptEl.value.trim():'';
+  if(!name){toast('患者名を入力してください');return;}
+  const ward=wardEl?wardEl.value.split('病棟')[0].split('（')[0].trim():'2A';
+  const bedNum=bedEl?bedEl.value||'01':'01';
+  // Update bed data
+  const wardKey=ward.replace('ICU','ICU').trim();
+  const bArr=BEDS[wardKey]||BEDS['2A'];
+  const bed=bArr.find(b=>b.n===bedNum.padStart(2,'0')||b.n===bedNum);
+  if(bed){bed.p=name;bed.s='occ';}
+  renderBeds();
+  closeM('admit');
+  toast('入院受付完了：'+name+' → '+ward+'病棟 '+bedNum+'号床');
+}
+
+/* ===========================
+   SOAP
+=========================== */
+function saveSoap(){
+  const areas=document.querySelectorAll('.soap-ta');
+  let filled=0;
+  areas.forEach(a=>{if(a.value.trim())filled++;});
+  if(filled===0){toast('SOAPの内容を入力してください');return;}
+  toast('診療記録を保存しました（自動バックアップ済）— '+new Date().toLocaleTimeString('ja-JP'));
+}
+
+function copyPrevRec(){
+  const areas=document.querySelectorAll('.soap-ta');
+  const vals=['血圧が高め。めまいが続いている。','BP 148/90, HR 78, BT 36.2, SpO2 98%','高血圧症（管理継続）','継続処方。次回2週後。'];
+  areas.forEach((a,i)=>{if(vals[i])a.value=vals[i];});
+  toast('前回記録を転記しました');
+}
+
+function openTemplate(){
+  const list=document.getElementById('tpl-list');
+  list.innerHTML=TEMPLATES.map((t,i)=>`
+    <div style="border:1px solid var(--g3);padding:7px 10px;margin-bottom:4px;cursor:pointer;background:#fff" onmouseover="this.style.background='var(--lblue)'" onmouseout="this.style.background='#fff'" onclick="applyTemplate(${i})">
+      <div style="font-size:12px;font-weight:bold;color:var(--navy2)">${t.name}</div>
+      <div style="font-size:10px;color:var(--tx3);margin-top:2px">S: ${t.s.slice(0,30)||'—'}</div>
+    </div>`).join('');
+  openM('template');
+}
+
+function applyTemplate(i){
+  const t=TEMPLATES[i];
+  const areas=document.querySelectorAll('.soap-ta');
+  if(areas[0])areas[0].value=t.s;
+  if(areas[1])areas[1].value=t.o;
+  if(areas[2])areas[2].value=t.a;
+  if(areas[3])areas[3].value=t.p;
+  closeM('template');
+  toast('テンプレート「'+t.name+'」を適用しました');
+}
+
+/* ===========================
+   BILLING
+=========================== */
+function showPrint(){
+  const ptSel=document.querySelector('#mo-billing-m .fi-sel');
+  const ptName=ptSel?ptSel.value:'—';
+  document.getElementById('print-name').textContent=ptName;
+  document.getElementById('print-rows').innerHTML=`
+    <tr><td style="border:1px solid #ccc;padding:4px">初診料</td><td style="border:1px solid #ccc;padding:4px;text-align:right">288点</td><td style="border:1px solid #ccc;padding:4px;text-align:right">¥864</td></tr>
+    <tr><td style="border:1px solid #ccc;padding:4px">血液一般(CBC)</td><td style="border:1px solid #ccc;padding:4px;text-align:right">160点</td><td style="border:1px solid #ccc;padding:4px;text-align:right">¥480</td></tr>
+    <tr><td style="border:1px solid #ccc;padding:4px">生化学検査(Ⅰ)</td><td style="border:1px solid #ccc;padding:4px;text-align:right">280点</td><td style="border:1px solid #ccc;padding:4px;text-align:right">¥840</td></tr>
+    <tr><td style="border:1px solid #ccc;padding:4px">頭部MRI</td><td style="border:1px solid #ccc;padding:4px;text-align:right">1,620点</td><td style="border:1px solid #ccc;padding:4px;text-align:right">¥4,860</td></tr>
+    <tr><td style="border:1px solid #ccc;padding:4px">処方箋料</td><td style="border:1px solid #ccc;padding:4px;text-align:right">68点</td><td style="border:1px solid #ccc;padding:4px;text-align:right">¥204</td></tr>`;
+  document.getElementById('print-total').textContent='患者負担（3割）合計: ¥7,404';
+  closeM('billing-m');
+  openM('print');
+}
+
+/* ===========================
+   ALERT ROWS (dashboard)
+=========================== */
+function alertRowAct(type,patient,detail){
+  document.getElementById('alert-modal-title').textContent='アラート対応 — '+type;
+  document.getElementById('alert-modal-body').innerHTML=`
+    <div class="fr"><span class="fl">患者名</span><b>${patient}</b></div>
+    <div class="fr"><span class="fl">内容</span><span style="color:var(--red);font-weight:bold">${detail}</span></div>
+    <div class="fr"><span class="fl">対応メモ</span><textarea class="fi fi-ta" style="flex:1" placeholder="対応内容を入力..."></textarea></div>`;
+  document.getElementById('alert-modal-ok').textContent='対応済みにする';
+  document.getElementById('alert-modal-ok').onclick=function(){closeM('alert-action');toast(patient+'のアラートを対応済みにしました');};
+  openM('alert-action');
+}
+
+/* ===========================
+   PATIENT SEARCH
+=========================== */
+function doSearch(){
+  const q=document.getElementById('search-input').value.trim().toLowerCase();
+  const res=document.getElementById('search-results');
+  if(!q){res.innerHTML='<div style="color:var(--tx3);font-size:11px;padding:4px">検索キーワードを入力してください</div>';return;}
+  const hits=PT_DB.filter(p=>p.name.toLowerCase().includes(q)||p.id.toLowerCase().includes(q)||p.dx.toLowerCase().includes(q));
+  if(hits.length===0){res.innerHTML='<div style="color:var(--tx3);font-size:11px;padding:4px">該当患者が見つかりません</div>';return;}
+  res.innerHTML=`<table class="t"><thead><tr><th>患者ID</th><th>氏名</th><th>年齢</th><th>担当科</th><th>主病名</th><th>区分</th><th></th></tr></thead><tbody>`+
+    hits.map(p=>`<tr><td>${p.id}</td><td><b>${p.name}</b></td><td>${p.meta}</td><td>${p.dept}</td><td>${p.dx}</td><td><span class="s ${p.type==='入院'?'s-bl':'s-gr'}">${p.type}</span></td><td><button class="btn b-bl b-sm" onclick="closeM('search');selPt(null,'${p.name}','${p.id}','${p.kana}','${p.meta}','${p.dept}','${p.dx}','${p.alg}','${p.type}')">選択</button></td></tr>`).join('')+
+    '</tbody></table>';
+}
+
+/* ===========================
+   MODAL
+=========================== */
+function openM(id){
+  const el=document.getElementById('mo-'+id);
+  if(el)el.classList.add('open');
+}
+function closeM(id){
+  const el=document.getElementById('mo-'+id);
+  if(el)el.classList.remove('open');
+}
+document.querySelectorAll('.mw').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
+
+/* ===========================
+   TOAST
+=========================== */
+function toast(msg){
+  const el=document.getElementById('toast-msg');
+  el.textContent=msg;el.style.display='block';
+  clearTimeout(toast._t);
+  toast._t=setTimeout(()=>el.style.display='none',3000);
+}
+
+/* ===========================
+   CLOCK
+=========================== */
+function tick(){
+  document.getElementById('clk').textContent=' '+new Date().toTimeString().slice(0,8);
+}
+setInterval(tick,1000);tick();
+
+/* ===========================
+   WIRE UP EXISTING BUTTONS
+=========================== */
+// Override billing print button
+document.querySelector('#mo-billing-m .mf').innerHTML=`
+  <button class="btn b-gy" onclick="closeM('billing-m')">閉じる</button>
+  <button class="btn b-gy" onclick="showPrint()">印刷プレビュー</button>
+  <button class="btn b-bl" onclick="closeM('billing-m');toast('会計・領収書を発行しました')">発行 (F5)</button>`;
+
+// Override new-order submit button
+document.querySelector('#mo-new-order .mf').innerHTML=`
+  <button class="btn b-gy" onclick="closeM('new-order')">キャンセル</button>
+  <button class="btn b-bl" onclick="submitOrder()">発行 (F5)</button>`;
+
+// Override new-pt submit button
+document.querySelector('#mo-new-pt .mf').innerHTML=`
+  <button class="btn b-gy" onclick="closeM('new-pt')">キャンセル</button>
+  <button class="btn b-bl" onclick="submitNewPt()">登録 (F5)</button>`;
+
+// Override new-rx submit button
+document.querySelector('#mo-new-rx .mf').innerHTML=`
+  <button class="btn b-gy" onclick="closeM('new-rx')">キャンセル</button>
+  <button class="btn b-rd b-sm" onclick="toast('処方を削除しました')">削除</button>
+  <button class="btn b-bl" onclick="submitRx()">保存 (F5)</button>`;
+
+// Override admit submit button
+document.querySelector('#mo-admit .mf').innerHTML=`
+  <button class="btn b-gy" onclick="closeM('admit')">キャンセル</button>
+  <button class="btn b-bl" onclick="submitAdmit()">受付 (F5)</button>`;
+
+// Override SOAP buttons
+document.querySelector('.soap-prev-btn').onclick=function(){openM('prev-rec');};
+document.querySelector('.soap-tpl-btn').onclick=function(){openTemplate();};
+
+// Override ward カルテ buttons for all rows
+document.querySelectorAll('.ward-chart-btn').forEach(btn=>{
+  btn.onclick=function(){
+    const row=btn.closest('tr');
+    const tds=row.querySelectorAll('td');
+    const name=tds[1].textContent.trim();
+    loadPatientByName(name);
+  };
+});
+
+// Alert rows → clickable
+document.querySelectorAll('#alert-tbody tr').forEach(tr=>{
+  tr.style.cursor='pointer';
+  tr.onclick=function(){
+    const tds=tr.querySelectorAll('td');
+    alertRowAct(tds[0].textContent,tds[1].textContent,tds[2].textContent);
+  };
+});
+
+// Logout button
+document.querySelector('.logout-btn').onclick=function(){openM('logout');};
+
+// Search button
+document.querySelector('.search-btn').onclick=function(){openM('search');};
+
+// 予約追加 button on dashboard
+const addSchBtn=document.getElementById('add-sch-btn');
+if(addSchBtn)addSchBtn.onclick=function(){openM('schedule');};
+
+// 病棟一覧 button → go ward tab
+document.querySelectorAll('.go-ward-btn').forEach(b=>b.onclick=function(){goT('ward');});
+
+/* ===========================
+   INIT
+=========================== */
+renderBeds();
+renderOrders();
+renderRx();
+renderScheduleTable();
+
+/* ===========================
+   STAFF (dynamic table)
+=========================== */
+const STAFF_LIST=[
+  {name:'山本 龍一',role:'医師',dept:'内科（部長）',pts:'24名',auth:'s-pu',authTx:'管理者'},
+  {name:'田中 美希',role:'医師',dept:'内科',pts:'18名',auth:'s-bl',authTx:'医師'},
+  {name:'中島 健太',role:'医師',dept:'外科（部長）',pts:'15名',auth:'s-bl',authTx:'医師'},
+  {name:'高橋 さくら',role:'医師',dept:'整形外科',pts:'12名',auth:'s-bl',authTx:'医師'},
+  {name:'佐々木 由美',role:'看護師長',dept:'2A病棟',pts:'—',auth:'s-tl',authTx:'看護師長'},
+  {name:'渡辺 香奈',role:'薬剤師',dept:'薬剤部',pts:'—',auth:'s-gr',authTx:'薬剤師'}
+];
+function renderStaff(){
+  const tbody=document.getElementById('staff-tbody');
+  if(!tbody)return;
+  tbody.innerHTML=STAFF_LIST.map((st,i)=>`
+    <tr>
+      <td><b>${st.name}</b></td><td>${st.role}</td><td>${st.dept}</td><td>${st.pts}</td>
+      <td><span class="s ${st.auth}">${st.authTx}</span></td>
+      <td><button class="btn b-gy b-sm" onclick="staffDetail(${i})">詳細</button></td>
+    </tr>`).join('');
+}
+function staffDetail(i){
+  const st=STAFF_LIST[i];
+  document.getElementById('alert-modal-title').textContent='スタッフ詳細 — '+st.name;
+  document.getElementById('alert-modal-body').innerHTML=`
+    <div class="fr"><span class="fl">氏名</span><b>${st.name}</b></div>
+    <div class="fr"><span class="fl">職種</span>${st.role}</div>
+    <div class="fr"><span class="fl">担当科</span>${st.dept}</div>
+    <div class="fr"><span class="fl">担当患者</span>${st.pts}</div>
+    <div class="fr"><span class="fl">権限</span><span class="s ${st.auth}">${st.authTx}</span></div>`;
+  document.getElementById('alert-modal-ok').textContent='権限を変更';
+  document.getElementById('alert-modal-ok').onclick=function(){closeM('alert-action');toast(st.name+'の権限を変更しました');};
+  openM('alert-action');
+}
+function submitStaff(){
+  const nameEl=document.querySelector('#mo-new-staff input.fi-l');
+  const roleEl=document.querySelectorAll('#mo-new-staff .fi-sel')[0];
+  const deptEl=document.querySelectorAll('#mo-new-staff .fi-sel')[1];
+  const authEl=document.querySelectorAll('#mo-new-staff .fi-sel')[2];
+  const name=nameEl?nameEl.value.trim():'';
+  if(!name){toast('氏名を入力してください');return;}
+  const authMap={'管理者':'s-pu','医師':'s-bl','看護師長':'s-tl','看護師':'s-tl','薬剤師':'s-gr','閲覧のみ':'s-gy'};
+  const authVal=authEl?authEl.value:'医師';
+  STAFF_LIST.push({name,role:roleEl?roleEl.value:'医師',dept:deptEl?deptEl.value:'内科',pts:'0名',auth:authMap[authVal]||'s-gy',authTx:authVal});
+  renderStaff();
+  closeM('new-staff');
+  toast('スタッフを追加しました：'+name);
+}
+// Override new-staff button
+document.querySelector('#mo-new-staff .mf').innerHTML=`
+  <button class="btn b-gy" onclick="closeM('new-staff')">キャンセル</button>
+  <button class="btn b-bl" onclick="submitStaff()">追加 (F5)</button>`;
+renderStaff();
+</script>
+</body>
+</html>
